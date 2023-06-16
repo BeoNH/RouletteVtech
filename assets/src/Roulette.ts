@@ -1,5 +1,19 @@
+import NetworkClient from "./Roulette.NetworkClient";
+import Configs from "./Roulette.Configs";
+import { Utils } from "./Roulette.Configs";
+
 
 const {ccclass, property} = cc._decorator;
+
+declare class requestHeaders { }
+
+enum GameState {
+    Waiting = 0,
+    Betting = 1,
+    ShowingResult = 2,
+    CalculatingResult = 3,
+    Ending = 4
+}
 
 @ccclass
 export default class Roulette extends cc.Component {
@@ -18,6 +32,8 @@ export default class Roulette extends cc.Component {
     private HEADER: string = "HEADER"
     @property(cc.Label)
     NickName: cc.Label = null;
+    @property(cc.Label)
+    LabelJackpot: cc.Label = null;
     @property(cc.Prefab)
     LineView: cc.Prefab[] = [];
     @property(cc.Node)
@@ -55,22 +71,118 @@ export default class Roulette extends cc.Component {
     private countTime: number = 20;
     private speed: number = 1;
     private cashWin: number[] = [0,0,0];
+    private ACCESS_TOKEN: string = "";
+    private data = {};
 
     public numberWin: number = null;
+
 
     onLoad() {
         Roulette.Ins =this;
 
-        this.LabelInGameCoin.string = `100000`;
+
+        NetworkClient.getInstance().addOnClose(() => {
+            console.log("Kết nối thất bại, thử lại . . .");
+        }, this);
+
+        NetworkClient.getInstance().addOnOpen(() => {
+            if (Configs.Login.IsLogin) {
+                console.log("Loging in...");
+                switch (Configs.Login.LoginType) {
+                    case Configs.LoginType.Gowin:
+                        this.sendLoginGowin(true);
+                        break;
+                    case Configs.LoginType.Quick:
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                this.sendLoginGowin(false);
+            }
+        }, this);
+
+        if (!NetworkClient.getInstance().isConnected()) {
+            console.log("Connecting to server...");
+            NetworkClient.getInstance().connect();
+        }
+
+        this.LabelInGameCoin.string = `${Configs.Login.CoinRoulette}`;
+        this.NickName.string = Configs.Login.Nickname;
+
+        NetworkClient.getInstance().request("rouletteJoin", {}, res => {
+            NetworkClient.getInstance().request("rouletteGetState", {}, res => {
+                console.log(res,"//////////////");
+            },this);
+        },this);
+        
     }
 
     start () {
         this.loop();
+        
+
     }
 
     protected update(dt: number): void {
         this.checkLineView();
     }
+
+    public sendLoginGowin(isReconnect: boolean = false, cb: () => void = null) {
+        if (typeof (requestHeaders) == "object" && requestHeaders["access-token"])
+            this.ACCESS_TOKEN = requestHeaders["access-token"];
+
+        if (!this.ACCESS_TOKEN) {
+            this.ACCESS_TOKEN = Utils.urlParam("token");
+        }
+
+        if (!this.ACCESS_TOKEN) {
+            console.log("Login failure, invalid token!, please try again later.");
+            return;
+        } 
+
+        NetworkClient.getInstance().request("gowinLogin", {
+            "accessToken": this.ACCESS_TOKEN,
+            "language": "my"
+        }, (res) => {
+            console.log(res);
+            if (!res["ok"]) {
+                let msg = "";
+                if (typeof res["msg"] == "string") {
+                    msg = res["msg"];
+                } else {
+                    msg = `Error ${res["err"]}, please try again later.`;
+                }
+
+                if (isReconnect) {
+                    Configs.Login.clear();
+                    cc.director.loadScene("Roulette");
+                }
+
+                return;
+            }
+            this.callbackLogined(res, Configs.LoginType.Gowin, isReconnect);
+            if (cb != null) cb();
+        }, this);
+    }
+
+    public callbackLogined(res: any, loginType: Configs.LoginType, isReconnect: boolean) {
+        Configs.Login.LoginType = loginType;
+        Configs.Login.IsLogin = true;
+        Configs.Login.CoinRoulette= res["cash"];
+        Configs.Login.UserId = res["userId"];
+        Configs.Login.Nickname = res["nickname"];
+
+        if (!isReconnect) {
+            if (Configs.Login.Nickname == "") {
+                Configs.Login.Nickname = `test_${res["userId"]}`
+            } else {
+                cc.director.loadScene("Roulette");
+            }
+        }
+    }
+
+
 
     onSpin(): void{
         let start = this.Rolls.position.x;
@@ -94,8 +206,6 @@ export default class Roulette extends cc.Component {
         this.CountDown.active = true;
         this.BgBet.active = false;
 
-        console.log(this.numberWin);
-        console.log(this.cashWin);
         this.updateLineView();
 
         let a = this.CountDown.children[1].getComponent(cc.Label);
