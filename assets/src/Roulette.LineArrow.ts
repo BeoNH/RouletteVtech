@@ -19,7 +19,9 @@ export default class NewClass extends cc.Component {
     }
 
     onCollisionEnter(other: cc.Collider, self: cc.Collider) {
-        Roulette.Ins.numberWin = parseInt(other.node.getComponentInChildren(cc.Label).string);
+        let numberCell = parseInt(other.node.getComponentInChildren(cc.Label).string);
+        Roulette.Ins.numberWin = numberCell;
+        
         for (let i = 0; i < self.node.childrenCount; i++) {
             self.node.children[i].color = other.node.color;
         }

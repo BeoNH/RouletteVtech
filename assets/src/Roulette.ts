@@ -37,7 +37,7 @@ export default class Roulette extends cc.Component {
     @property(cc.Prefab)
     LineView: cc.Prefab[] = [];
     @property(cc.Node)
-    LayoutView: cc.Node = null;
+    PreviousRollView: cc.Node = null;
     @property(cc.Label)
     LabelPutCoin: cc.Label = null;
     @property(cc.Button)
@@ -63,18 +63,21 @@ export default class Roulette extends cc.Component {
     LabelInGameCoin: cc.Label = null;
     @property(cc.Node)
     BgBet: cc.Node = null;
+    @property(cc.Node)
+    BgWin: cc.Node = null;
 
 
     private readonly dataBet = [0,1,10,100,1000];
 
-    private rollTime: number = 7;
-    private countTime: number = 20;
+    private gamestate: GameState = GameState.Waiting;
+    private countTime: number = 0;
     private speed: number = 1;
-    private cashWin: number[] = [0,0,0];
     private ACCESS_TOKEN: string = "";
-    private data = {};
-
+    
     public numberWin: number = null;
+
+    private result: number = null; // Ô trúng thưởng
+    private number_result: number = null; // Số trúng thưởng.
 
 
     onLoad() {
@@ -92,10 +95,6 @@ export default class Roulette extends cc.Component {
                     case Configs.LoginType.Gowin:
                         this.sendLoginGowin(true);
                         break;
-                    case Configs.LoginType.Quick:
-                        break;
-                    default:
-                        break;
                 }
             } else {
                 this.sendLoginGowin(false);
@@ -107,25 +106,116 @@ export default class Roulette extends cc.Component {
             NetworkClient.getInstance().connect();
         }
 
-        this.LabelInGameCoin.string = `${Configs.Login.CoinRoulette}`;
         this.NickName.string = Configs.Login.Nickname;
-
+        
         NetworkClient.getInstance().request("rouletteJoin", {}, res => {
-            NetworkClient.getInstance().request("rouletteGetState", {}, res => {
-                console.log(res,"//////////////");
+            if (!res["ok"]) {
+                console.error("roulette", "!res.ok");
+                return;
+            }
+
+            NetworkClient.getInstance().request("rouletteResultHistory", {}, res => {
+                for (let i = 0; i < res[`data`].length; i++) {
+                    let id = res[`data`][`${i}`];
+                    let line = cc.instantiate(this.LineView[id]);
+                    line.parent = this.PreviousRollView;
+                    line.setSiblingIndex(0);                     
+                }
             },this);
+        },this);
+
+
+        NetworkClient.getInstance().addListener((route, res) => {
+            switch (route) {
+                case `OnRouletteJoin`:
+                    break;
+                case `OnRouletteLeave`:
+                    break;
+                case `OnRouletteBet`:
+                    let item = cc.instantiate(this.ItemKhungBet);
+                    item.getChildByName(`lbName`).getComponent(cc.Label).string = `${res[`userId`]}`;
+                    item.getChildByName(`lbCoin`).getComponent(cc.Label).string = `${res[`amount`]}`;
+                    switch (res[`slotId`]) {
+                        case 2:
+                            this.checkLayoutBet(item, 2);
+                            break;
+                        case 1:
+                            this.checkLayoutBet(item, 1);
+                            break;
+                        case 0:
+                            this.checkLayoutBet(item, 0);
+                            break;
+                    }
+                    break;
+                case `OnRouletteState`:
+                    this.gamestate = res[`state`];
+                    this.countTime =  res["start"] + res["length"];
+
+                    switch (this.gamestate) {
+                        case GameState.Waiting://0
+                            this.LabelJackpot = res[`jp`];
+                            this.clearData();
+                            break;
+                        case GameState.Betting://1
+                            this.onBetting();
+                            break;
+                        case GameState.ShowingResult://2
+                            this.CountDown.active = false;
+                            this.resetView();
+                            this.onSpin();
+                            this.result = res[`result`][`0`];
+                            this.number_result = res[`number_result`]
+                            break;
+                        case GameState.CalculatingResult://3
+                            this.BgBet.active = false;
+                            break;
+                        case GameState.Ending://4
+                            this.BgWin.children[this.result].active = true
+                            this.updateLineView();
+                            break;
+                    }
+                    break;
+                case `OnRouletteWin`:
+                    let data = res[`${this.result}`];
+                    let newCoin = Configs.Login.CoinRoulette;
+                    data.forEach(e2 => {
+                        if (e2["userId"] == Configs.Login.UserId) {
+                                    newCoin = e2["cash"];
+                                }
+                            });
+                            Configs.Login.CoinRoulette = newCoin;
+                    break;
+            }
         },this);
         
     }
-
+    
     start () {
-        this.loop();
-        
-
+        this.getGameState();
     }
-
+    
     protected update(dt: number): void {
+        this.LabelInGameCoin.string = `${Configs.Login.CoinRoulette}`;
+        
         this.checkLineView();
+
+        let time = (this.countTime - NetworkClient.serverCurrentTimeMillis())/1000;
+        switch (this.gamestate) {
+            case GameState.Betting:
+                if(this.countTime > 0){
+                    if(time > 0){
+                        this.CountDown.children[1].getComponent(cc.Label).string = `${time < 10 ? "0" : ""}${time.toFixed(2)}`;
+                    }
+                }
+                break;
+            case GameState.CalculatingResult:
+                if(this.number_result == this.numberWin){
+                    this.Rolls.stopAllActions();
+                }
+            break;
+        }
+        
+        
     }
 
     public sendLoginGowin(isReconnect: boolean = false, cb: () => void = null) {
@@ -183,6 +273,34 @@ export default class Roulette extends cc.Component {
     }
 
 
+    getGameState(): void{
+        this.clearData();
+
+        NetworkClient.getInstance().request("rouletteJoin", {}, res => {
+            NetworkClient.getInstance().request("rouletteGetState", {}, res => {
+
+                let data = res["data"];
+                this.gamestate = data[`state`];
+                this.countTime =  data["start"] + data["length"];
+                this.LabelJackpot.string = data["jp"];
+                this.result = data[`result`];
+                this.number_result = data[`number_result`];
+
+                
+                switch (this.gamestate) {
+                    case GameState.Betting://1
+                        this.onBetting();
+                        break;
+                    case GameState.ShowingResult://2
+                        this.resetView();
+                        this.onSpin();
+                        break;
+                    case GameState.CalculatingResult:
+                        this.BgWin.children[this.result].active = true;
+                }
+            },this);
+        },this);
+    }
 
     onSpin(): void{
         let start = this.Rolls.position.x;
@@ -200,48 +318,26 @@ export default class Roulette extends cc.Component {
         .start();
     }
 
-    countDown(): void{
-        this.Rolls.stopAllActions();
-        this.interactableButtons(true);
+    onBetting(): void{
         this.CountDown.active = true;
-        this.BgBet.active = false;
-
-        this.updateLineView();
-
-        let a = this.CountDown.children[1].getComponent(cc.Label);
-        this.countTime = 20;
-        this.lineTime();
         this.Arrow.opacity = 100;
-        this.schedule(()=>{
-            this.countTime -= 0.016667;
-            a.string = `${this.countTime.toFixed(2)}`;
-            if(this.countTime <= 0){
-                this.Arrow.opacity = 255;
-                this.CountDown.active = false;
-                this.BgBet.active = true;
-                this.BgBet.position.x = 700;
-                this.Line.width = 1178;
-                this.unscheduleAllCallbacks();
-                this.loop();
-            }
-        },0.01)
-        
+        this.turnOffBgWin();
+
+        this.interactableButtons(true);
+        this.lineTime();
     }
 
-    loop(): void{
-        this.scheduleOnce(()=>{
-            this.speed = 1;
-            this.onSpin();
-            this.scheduleOnce(()=>{
-                this.clearData();
-                this.countDown();
-            },this.rollTime)
-        },1)
+    resetView(): void{
+        this.Arrow.opacity = 255;
+        this.BgBet.active = true;
+        this.Line.width = 1178;
     }
 
     lineTime(): void{
+        let time = (this.countTime - NetworkClient.serverCurrentTimeMillis())/1000;
+
         cc.tween(this.Line)
-        .to(this.countTime, {width: 0})
+        .to(time, {width: 0})
         .start();
     }
 
@@ -257,34 +353,9 @@ export default class Roulette extends cc.Component {
 
     }
 
-    onClickBet(event: cc.Event.EventTouch, customEventData: string): void{
-        let a = parseInt(this.LabelInGameCoin.string) - parseInt(this.LabelPutCoin.string);
-        if(a<0){
-            console.log("NAP THEM TIEN DI !!!!!");
-        }else{
-            let item = cc.instantiate(this.ItemKhungBet);
-            item.getChildByName(`lbName`).getComponent(cc.Label).string = `${this.NickName.string}`;
-            item.getChildByName(`lbCoin`).getComponent(cc.Label).string = `${this.LabelPutCoin.string}`;
-            switch (customEventData) {
-                case "x2":
-                    this.checkLayoutBet(item, 2);
-                    break;
-                case "x14":
-                    this.checkLayoutBet(item, 1);
-                    break;
-                default:
-                    this.checkLayoutBet(item, 0);
-                    break;
-            }
-            this.LabelInGameCoin.string = `${a}`;
-        }
-
-    }
-
     checkLayoutBet(data: cc.Node, idx: number): void{
         if(this.LayoutBet[idx].childrenCount == 0){
             data.parent = this.LayoutBet[idx];
-            this.cashWin[idx]= parseInt(data.getChildByName(`lbCoin`).getComponent(cc.Label).string);
         }else{
             for (let i = 0; i < this.LayoutBet[idx].childrenCount; i++) {
                 let a = this.LayoutBet[idx].children[i];
@@ -294,12 +365,10 @@ export default class Roulette extends cc.Component {
                     let d = parseInt(a.getChildByName(`lbCoin`).getComponent(cc.Label).string);
                     d += parseInt(data.getChildByName(`lbCoin`).getComponent(cc.Label).string);
                     a.getChildByName(`lbCoin`).getComponent(cc.Label).string = `${d}`;
-                }
-                else{
-                    data.parent = this.LayoutBet[idx];
+                    return;
                 }      
-                this.cashWin[idx]= parseInt(a.getChildByName(`lbCoin`).getComponent(cc.Label).string);
             }
+            data.parent = this.LayoutBet[idx];
         }
     }
 
@@ -310,25 +379,58 @@ export default class Roulette extends cc.Component {
     }
 
     updateLineView(): void{
-        let a = 0;
-        if ([1, 2, 3, 4, 5, 6, 7].includes(this.numberWin)) {
-            a = 2;
-        } else if ([8, 9, 10, 11, 12, 13, 14].includes(this.numberWin)) {
-            a = 0;
-        } else if ([0].includes(this.numberWin)) {
-            a = 1;
-        }
-        this.CheckWin(a);
-        let line = cc.instantiate(this.LineView[a]);
-        line.parent = this.LayoutView;
+        let line = cc.instantiate(this.LineView[this.result]);
+        line.parent = this.PreviousRollView;
     }
 
     checkLineView(): void{
-        if(this.LayoutView.childrenCount > 100){
-            let item = this.LayoutView.children[0];
+        if(this.PreviousRollView.childrenCount > 100){
+            let item = this.PreviousRollView.children[0];
             item.removeFromParent();
             item.destroy();
         }
+    }
+    
+    turnOffBgWin(): void{
+        for (let i = 0; i < this.BgWin.childrenCount; i++) {
+            this.BgWin.children[i].active = false;
+        }
+    }
+
+    
+    onClickBet(event: cc.Event.EventTouch, customEventData: string): void{
+
+        let betMoney = parseInt(this.LabelPutCoin.string);
+
+        // NetworkClient.getInstance().request("rouletteJoin", {}, res => {
+            NetworkClient.getInstance().request("rouletteBet", {
+                "amount": betMoney,
+                "slotId" : customEventData,
+            }, res => {
+                if (!res["ok"]) return;
+
+                let a = res[`cash`] - betMoney;
+                if(a<0){
+                    console.log("NAP THEM TIEN DI !!!!!");
+                }else{
+                    let item = cc.instantiate(this.ItemKhungBet);
+                    item.getChildByName(`lbName`).getComponent(cc.Label).string = `${this.NickName.string}`;
+                    item.getChildByName(`lbCoin`).getComponent(cc.Label).string = `${this.LabelPutCoin.string}`;
+                    switch (customEventData) {
+                        case "2":
+                            this.checkLayoutBet(item, 2);
+                            break;
+                        case "1":
+                            this.checkLayoutBet(item, 1);
+                            break;
+                        case "0":
+                            this.checkLayoutBet(item, 0);
+                            break;
+                    }
+                    Configs.Login.CoinRoulette = a;
+                }
+            },this);
+        // },this);
     }
 
     onClickPut(event: cc.Event.EventTouch, customEventData: string) {
@@ -349,15 +451,5 @@ export default class Roulette extends cc.Component {
                 this.LabelPutCoin.string = `${this.dataBet[0]}`;
                 break;
         }
-    }
-
-    CheckWin(idx: number) {
-        let a = parseInt(this.LabelInGameCoin.string);
-        if(idx == 1){
-            this.LabelInGameCoin.string = `${a+this.cashWin[idx]*14}`;
-        }else{
-            this.LabelInGameCoin.string = `${a+this.cashWin[idx]*2}`;
-        }
-        this.cashWin = [0,0,0];
     }
 }

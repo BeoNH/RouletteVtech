@@ -102,7 +102,7 @@ export default class NetworkClient {
         let pack: Object = msgpack.decode(data);
         if (pack.hasOwnProperty("msgId")) {
             if (pack["msgId"] == 0) {
-                console.log(`${pack["route"]}!!!>>`, pack["data"]);
+                console.log(`${pack["route"]}!!!<<<<<`, pack["data"]);
                 for (let i = 0; i < this.listeners.length; i++) {
                     let listener = this.listeners[i];
                     if (listener.target && listener.target instanceof Object && listener.target.node) {
@@ -116,7 +116,7 @@ export default class NetworkClient {
                 if (this.requests.hasOwnProperty(pack["msgId"])) {
                     let listener: RequestListener = this.requests[pack["msgId"]];
                     if (listener.target && listener.target instanceof Object && listener.target.node) {
-                        console.log(`${listener.route}>>>>>`, pack["data"]);
+                        console.log(`${listener.route}<<<<<`, pack["data"]);
                         listener.callback(pack["data"]);
                     }
                     delete this.requests[pack["msgId"]];
@@ -228,7 +228,7 @@ export default class NetworkClient {
             NetworkClient.reqId = 1;
         }
         this.requests[NetworkClient.reqId] = new RequestListener(target, route, callback);
-        console.log(`${route}<<<<<`, data);
+        console.log(`${route}>>>>>`, data);
         this.send({ data: typeof data != "object" || data == null || !data ? {} : data, msgId: NetworkClient.reqId, route: route });
     }
 
