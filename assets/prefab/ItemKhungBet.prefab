@@ -103,8 +103,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 62.25,
-      "height": 30.24
+      "width": 65.98,
+      "height": 31.5
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -158,10 +158,12 @@
     "_string": "abcxyz",
     "_N$string": "abcxyz",
     "_fontSize": 20,
-    "_lineHeight": 24,
+    "_lineHeight": 25,
     "_enableWrapText": true,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "0fb31aa3-0d80-42ac-bfa4-dc441d08f1e2"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,
@@ -211,8 +213,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 22.25,
-      "height": 30.24
+      "width": 20.24,
+      "height": 31.5
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -266,10 +268,12 @@
     "_string": "10",
     "_N$string": "10",
     "_fontSize": 20,
-    "_lineHeight": 24,
+    "_lineHeight": 25,
     "_enableWrapText": true,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_N$file": {
+      "__uuid__": "0fb31aa3-0d80-42ac-bfa4-dc441d08f1e2"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_styleFlags": 0,

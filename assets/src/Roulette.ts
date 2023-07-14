@@ -1,6 +1,7 @@
 import NetworkClient from "./Roulette.NetworkClient";
 import Configs from "./Roulette.Configs";
 import { Utils } from "./Roulette.Configs";
+import PopupRule from "./Roulette.Popup.Rule";
 
 
 const {ccclass, property} = cc._decorator;
@@ -23,8 +24,8 @@ export default class Roulette extends cc.Component {
     Rolls: cc.Node = null;
     @property(cc.Node)
     CountDown: cc.Node = null;
-    @property(cc.Node)
-    Line: cc.Node = null;
+    // @property(cc.Node)
+    // Line: cc.Node = null;
     @property(cc.Node)
     Arrow: cc.Node = null;
 
@@ -66,6 +67,13 @@ export default class Roulette extends cc.Component {
     @property(cc.Node)
     BgWin: cc.Node = null;
 
+    @property({ readonly: true, editorOnly: true, serializable: false })
+    private POPUP: string = "FOOTER"
+    @property(cc.Node)
+    popups: cc.Node = null;
+    @property(cc.Prefab)
+    popupRule:cc.Prefab = null;
+
 
     private readonly dataBet = [0,1,10,100,1000];
 
@@ -76,7 +84,7 @@ export default class Roulette extends cc.Component {
     
     public numberWin: number = null;
 
-    private result: number = null; // Ô trúng thưởng
+    private result: number = null; // Ô trúng thưởng (0-Xam, 1-Xanh, 2-Đỏ)
     private number_result: number = null; // Số trúng thưởng.
 
 
@@ -99,6 +107,7 @@ export default class Roulette extends cc.Component {
             } else {
                 this.sendLoginGowin(false);
             }
+
         }, this);
 
         if (!NetworkClient.getInstance().isConnected()) {
@@ -187,6 +196,10 @@ export default class Roulette extends cc.Component {
                     break;
             }
         },this);
+
+        // NetworkClient.getInstance().addOnOpen(() => {
+        //     this.getGameState();
+        // }, this);
         
     }
     
@@ -278,6 +291,9 @@ export default class Roulette extends cc.Component {
 
         NetworkClient.getInstance().request("rouletteJoin", {}, res => {
             NetworkClient.getInstance().request("rouletteGetState", {}, res => {
+                if (!res["ok"] || res["data"]["numberOfPlayer"] <= 0) {
+                return;
+            }
 
                 let data = res["data"];
                 this.gamestate = data[`state`];
@@ -304,15 +320,15 @@ export default class Roulette extends cc.Component {
 
     onSpin(): void{
         let start = this.Rolls.position.x;
-        let end = start + 567;
-        this.speed = end / 1134;
+        let end = start + 690;
+        this.speed = end / 1380;
 
         this.interactableButtons(false);
 
         cc.tween(this.Rolls)
-        .to(this.speed, {position: cc.v3(-567)})
+        .to(this.speed, {position: cc.v3(-690)})
         .call(()=> {
-            this.Rolls.position = cc.v3(567);
+            this.Rolls.position = cc.v3(690);
             this.onSpin();
         })
         .start();
@@ -324,22 +340,22 @@ export default class Roulette extends cc.Component {
         this.turnOffBgWin();
 
         this.interactableButtons(true);
-        this.lineTime();
+        // this.lineTime();
     }
 
     resetView(): void{
         this.Arrow.opacity = 255;
         this.BgBet.active = true;
-        this.Line.width = 1178;
+        // this.Line.width = 1178;
     }
 
-    lineTime(): void{
-        let time = (this.countTime - NetworkClient.serverCurrentTimeMillis())/1000;
+    // lineTime(): void{
+    //     let time = (this.countTime - NetworkClient.serverCurrentTimeMillis())/1000;
 
-        cc.tween(this.Line)
-        .to(time, {width: 0})
-        .start();
-    }
+    //     cc.tween(this.Line)
+    //     .to(time, {width: 0})
+    //     .start();
+    // }
 
     private interactableButtons(interactable: boolean) {
         for (let i = 0; i < this.BtnBet.length; i++) {
@@ -451,5 +467,13 @@ export default class Roulette extends cc.Component {
                 this.LabelPutCoin.string = `${this.dataBet[0]}`;
                 break;
         }
+    }
+
+    onClickPayment(){
+        window.location.href = "https://gowin.asia/payment";
+    }
+
+    onClickRule() {
+        PopupRule.show();
     }
 }

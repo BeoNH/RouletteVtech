@@ -14,7 +14,7 @@ export default class KhungBet extends cc.Component {
 
     start () {
         this.panel.active = true;
-        this.panel.height = 310;
+        this.panel.height = 207;
     }
     protected update(dt: number): void {
         this.checkTotalBet();
@@ -23,13 +23,18 @@ export default class KhungBet extends cc.Component {
     showMenu() {
         let isShow = !this.panel.active;
         cc.Tween.stopAllByTarget(this.panel);
+
         if (isShow) {
             this.panel.active = true;
-            cc.tween(this.panel).to(0.3, { height: 310 }).start();
+            cc.tween(this.panel).to(0.4, { height: 207 }).start();
+            cc.tween(this.panel.parent).to(0.4, { height: 346 }).start();
+            this.node.children[2].children[0].angle = -90;
         } else {
-            cc.tween(this.panel).to(0.3, { height: 0 }).call(() => {
+            cc.tween(this.panel).to(0.4, { height: 0 }).call(() => {
                 this.panel.active = false;
             }).start();
+            cc.tween(this.panel.parent).to(0.4, { height: 130 }).start();
+            this.node.children[2].children[0].angle = 0;
         }
     }
 
