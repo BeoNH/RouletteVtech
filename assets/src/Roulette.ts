@@ -21,6 +21,13 @@ export default class Roulette extends cc.Component {
     public static Ins: Roulette;
 
     @property(cc.Node)
+    loading: cc.Node = null;
+    @property(cc.Node)
+    loadingIcon: cc.Node = null;
+    @property(cc.Label)
+    loadingLabel: cc.Label = null;
+
+    @property(cc.Node)
     Rolls: cc.Node = null;
     @property(cc.Node)
     CountDown: cc.Node = null;
@@ -87,31 +94,35 @@ export default class Roulette extends cc.Component {
     private result: number = null; // Ô trúng thưởng (0-Xam, 1-Xanh, 2-Đỏ)
     private number_result: number = null; // Số trúng thưởng.
 
+    private timeOutLoading: any = null;
+
 
     onLoad() {
         Roulette.Ins =this;
 
 
         NetworkClient.getInstance().addOnClose(() => {
-            console.log("Kết nối thất bại, thử lại . . .");
+            this.showErrLoading("Kết nối thất bại, thử lại . . .");
         }, this);
 
         NetworkClient.getInstance().addOnOpen(() => {
             if (Configs.Login.IsLogin) {
-                console.log("Loging in...");
+                this.showErrLoading("Loging in...");
                 switch (Configs.Login.LoginType) {
                     case Configs.LoginType.Gowin:
                         this.sendLoginGowin(true);
                         break;
                 }
             } else {
+                this.showLoading(false);
                 this.sendLoginGowin(false);
             }
-
+            
+            this.getGameState();
         }, this);
 
         if (!NetworkClient.getInstance().isConnected()) {
-            console.log("Connecting to server...");
+            this.showErrLoading("Connecting to server...");
             NetworkClient.getInstance().connect();
         }
 
@@ -141,8 +152,9 @@ export default class Roulette extends cc.Component {
                 case `OnRouletteLeave`:
                     break;
                 case `OnRouletteBet`:
+                    
                     let item = cc.instantiate(this.ItemKhungBet);
-                    item.getChildByName(`lbName`).getComponent(cc.Label).string = `${res[`userId`]}`;
+                    item.getChildByName(`lbName`).getComponent(cc.Label).string = `${res[`nickName`]}`;
                     item.getChildByName(`lbCoin`).getComponent(cc.Label).string = `${res[`amount`]}`;
                     switch (res[`slotId`]) {
                         case 2:
@@ -162,7 +174,6 @@ export default class Roulette extends cc.Component {
 
                     switch (this.gamestate) {
                         case GameState.Waiting://0
-                            this.LabelJackpot = res[`jp`];
                             this.clearData();
                             break;
                         case GameState.Betting://1
@@ -228,7 +239,33 @@ export default class Roulette extends cc.Component {
             break;
         }
         
-        
+        NetworkClient.getInstance().addListener((route, res) => {
+            if(route == "OnRouletteUpdatejp"){
+                this.LabelJackpot.string = res[`jp`];
+            }
+        },this);
+    }
+
+    showLoading(isShow: boolean, timeOut: number = 15) {
+        // this.loadingLabel.string = "လုဒ်တင်လုပ်နေသည်....";
+        if (this.timeOutLoading != null) clearTimeout(this.timeOutLoading);
+        if (isShow) {
+            if (timeOut > 0) {
+                this.timeOutLoading = setTimeout(() => {
+                    this.showLoading(false);
+                }, timeOut * 1000);
+            }
+            this.loading.active = true;
+        } else {
+            this.loading.active = false;
+        }
+        this.loadingIcon.stopAllActions();
+        this.loadingIcon.runAction(cc.repeatForever(cc.rotateBy(1, 360)));
+    }
+
+    showErrLoading(msg?: string) {
+        this.showLoading(true, -1);
+        this.loadingLabel.string = msg ? msg : "Loss of connection, retrying ...";
     }
 
     public sendLoginGowin(isReconnect: boolean = false, cb: () => void = null) {
@@ -298,9 +335,9 @@ export default class Roulette extends cc.Component {
                 let data = res["data"];
                 this.gamestate = data[`state`];
                 this.countTime =  data["start"] + data["length"];
-                this.LabelJackpot.string = data["jp"];
                 this.result = data[`result`];
                 this.number_result = data[`number_result`];
+                this.LabelJackpot.string = data[`jp`];
 
                 
                 switch (this.gamestate) {
@@ -417,6 +454,7 @@ export default class Roulette extends cc.Component {
     onClickBet(event: cc.Event.EventTouch, customEventData: string): void{
 
         let betMoney = parseInt(this.LabelPutCoin.string);
+        if(betMoney == 0) return;
 
         // NetworkClient.getInstance().request("rouletteJoin", {}, res => {
             NetworkClient.getInstance().request("rouletteBet", {
@@ -425,7 +463,7 @@ export default class Roulette extends cc.Component {
             }, res => {
                 if (!res["ok"]) return;
 
-                let a = res[`cash`] - betMoney;
+                let a = res[`cash`];
                 if(a<0){
                     console.log("NAP THEM TIEN DI !!!!!");
                 }else{
@@ -470,7 +508,8 @@ export default class Roulette extends cc.Component {
     }
 
     onClickPayment(){
-        window.location.href = "https://gowin.asia/payment";
+        // window.location.href = "https://gowin.asia/payment";
+        window.open("https://gowin.asia/payment");
     }
 
     onClickRule() {
