@@ -22,7 +22,7 @@ namespace Configs {
     }
 
     export class Login {
-        static LoginType: LoginType = LoginType.Normal;
+        static LoginType: LoginType = LoginType.Gowin;
         static IsLogin: boolean = false;
 
         static CoinRoulette: number = 0;

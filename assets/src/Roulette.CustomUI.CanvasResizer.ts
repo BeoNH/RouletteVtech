@@ -5,7 +5,7 @@ const { ccclass, property, requireComponent } = cc._decorator;
 export default class CanvasResizer extends cc.Component {
 
     @property
-    designResolution: cc.Size = new cc.Size(1280, 720);
+    designResolution: cc.Size = new cc.Size(1920, 1080);
 
     lastWitdh: number = 0;
     lastHeight: number = 0;

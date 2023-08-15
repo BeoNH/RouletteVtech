@@ -18,14 +18,12 @@ export default class NewClass extends cc.Component {
 
     }
 
-    onCollisionEnter(other: cc.Collider, self: cc.Collider) {
+    onCollisionEnter(other: cc.BoxCollider, self: cc.Collider) {
         let numberCell = parseInt(other.node.getComponentInChildren(cc.Label).string);
+        // let numberColor = other.node.getComponent(cc.BoxCollider).tag;
         Roulette.Ins.numberWin = numberCell;
-        
-        // for (let i = 0; i < self.node.childrenCount; i++) {
-        //     self.node.children[i].color = other.node.color;
-        // }
-        // Roulette.Ins.Line.children[0].color = other.node.color;
-        // Roulette.Ins.Line.children[1].color = other.node.color;
+    }
+    onCollisionExit(){
+        Roulette.Ins.numberWin = null;
     }
 }

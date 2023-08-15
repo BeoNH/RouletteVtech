@@ -1,0 +1,314 @@
+
+jackpot.png
+size: 1995,441
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+1 (1)
+  rotate: true
+  xy: 610, 215
+  size: 224, 127
+  orig: 400, 300
+  offset: 129, 94
+  index: -1
+1 (10)
+  rotate: false
+  xy: 259, 185
+  size: 214, 254
+  orig: 400, 300
+  offset: 82, 27
+  index: -1
+1 (11)
+  rotate: false
+  xy: 2, 163
+  size: 255, 276
+  orig: 400, 300
+  offset: 66, 4
+  index: -1
+1 (12)
+  rotate: false
+  xy: 424, 11
+  size: 243, 172
+  orig: 400, 300
+  offset: 85, 98
+  index: -1
+1 (2)
+  rotate: false
+  xy: 739, 251
+  size: 116, 188
+  orig: 400, 300
+  offset: 137, 87
+  index: -1
+1 (3)
+  rotate: false
+  xy: 1128, 164
+  size: 87, 132
+  orig: 400, 300
+  offset: 147, 155
+  index: -1
+1 (4)
+  rotate: false
+  xy: 1081, 298
+  size: 113, 141
+  orig: 400, 300
+  offset: 134, 147
+  index: -1
+1 (5)
+  rotate: false
+  xy: 1011, 114
+  size: 115, 161
+  orig: 400, 300
+  offset: 132, 124
+  index: -1
+1 (6)
+  rotate: false
+  xy: 669, 13
+  size: 118, 200
+  orig: 400, 300
+  offset: 134, 85
+  index: -1
+1 (7)
+  rotate: false
+  xy: 475, 208
+  size: 133, 231
+  orig: 400, 300
+  offset: 127, 53
+  index: -1
+1 (8)
+  rotate: true
+  xy: 789, 79
+  size: 170, 110
+  orig: 400, 300
+  offset: 106, 155
+  index: -1
+1 (9)
+  rotate: false
+  xy: 244, 14
+  size: 178, 147
+  orig: 400, 300
+  offset: 98, 123
+  index: -1
+Hue/Saturation 3
+  rotate: false
+  xy: 158, 12
+  size: 84, 149
+  orig: 86, 151
+  offset: 1, 1
+  index: -1
+Layer 1
+  rotate: false
+  xy: 963, 277
+  size: 116, 162
+  orig: 118, 166
+  offset: 1, 2
+  index: -1
+Layer 2
+  rotate: false
+  xy: 1217, 179
+  size: 103, 129
+  orig: 105, 132
+  offset: 1, 2
+  index: -1
+Layer 3
+  rotate: false
+  xy: 1196, 310
+  size: 104, 129
+  orig: 106, 132
+  offset: 1, 2
+  index: -1
+Layer 4
+  rotate: false
+  xy: 901, 103
+  size: 108, 166
+  orig: 110, 168
+  offset: 1, 1
+  index: -1
+Layer 5
+  rotate: false
+  xy: 857, 271
+  size: 104, 168
+  orig: 107, 170
+  offset: 2, 1
+  index: -1
+Layer 6
+  rotate: true
+  xy: 1046, 5
+  size: 107, 129
+  orig: 109, 132
+  offset: 1, 2
+  index: -1
+coin_0000_Layer-23
+  rotate: true
+  xy: 1686, 312
+  size: 127, 125
+  orig: 130, 129
+  offset: 2, 2
+  index: -1
+coin_0001_Layer-22
+  rotate: true
+  xy: 1322, 183
+  size: 127, 126
+  orig: 130, 129
+  offset: 2, 1
+  index: -1
+coin_0002_Layer-21
+  rotate: true
+  xy: 1559, 312
+  size: 127, 125
+  orig: 130, 129
+  offset: 2, 2
+  index: -1
+coin_0003_Layer-20
+  rotate: true
+  xy: 1472, 54
+  size: 127, 125
+  orig: 130, 129
+  offset: 2, 2
+  index: -1
+coin_0019_Layer-4
+  rotate: true
+  xy: 1472, 54
+  size: 127, 125
+  orig: 130, 129
+  offset: 2, 2
+  index: -1
+coin_0004_Layer-19
+  rotate: true
+  xy: 1578, 183
+  size: 127, 125
+  orig: 130, 129
+  offset: 2, 2
+  index: -1
+coin_0005_Layer-18
+  rotate: false
+  xy: 1431, 312
+  size: 126, 127
+  orig: 130, 129
+  offset: 2, 1
+  index: -1
+coin_0006_Layer-17
+  rotate: false
+  xy: 1813, 313
+  size: 114, 126
+  orig: 130, 129
+  offset: 8, 2
+  index: -1
+coin_0007_Layer-16
+  rotate: false
+  xy: 1705, 183
+  size: 93, 127
+  orig: 130, 129
+  offset: 18, 1
+  index: -1
+coin_0008_Layer-15
+  rotate: false
+  xy: 1928, 185
+  size: 62, 126
+  orig: 130, 129
+  offset: 34, 1
+  index: -1
+coin_0009_Layer-14
+  rotate: false
+  xy: 1306, 2
+  size: 35, 124
+  orig: 130, 129
+  offset: 49, 3
+  index: -1
+coin_0010_Layer-13
+  rotate: true
+  xy: 789, 9
+  size: 68, 126
+  orig: 130, 129
+  offset: 33, 1
+  index: -1
+coin_0011_Layer-12
+  rotate: true
+  xy: 917, 6
+  size: 95, 127
+  orig: 130, 129
+  offset: 19, 1
+  index: -1
+coin_0012_Layer-11
+  rotate: true
+  xy: 1177, 6
+  size: 114, 127
+  orig: 130, 129
+  offset: 9, 1
+  index: -1
+coin_0013_Layer-10
+  rotate: true
+  xy: 1343, 3
+  size: 123, 127
+  orig: 130, 129
+  offset: 4, 1
+  index: -1
+coin_0014_Layer-9
+  rotate: false
+  xy: 1450, 183
+  size: 126, 127
+  orig: 130, 129
+  offset: 2, 1
+  index: -1
+coin_0015_Layer-8
+  rotate: false
+  xy: 1721, 55
+  size: 126, 126
+  orig: 130, 129
+  offset: 1, 1
+  index: -1
+coin_0016_Layer-7
+  rotate: false
+  xy: 1599, 54
+  size: 120, 127
+  orig: 130, 129
+  offset: 4, 1
+  index: -1
+coin_0017_Layer-6
+  rotate: true
+  xy: 1255, 128
+  size: 49, 125
+  orig: 130, 129
+  offset: 39, 2
+  index: -1
+coin_0018_Layer-5
+  rotate: false
+  xy: 1302, 312
+  size: 127, 127
+  orig: 130, 129
+  offset: 2, 1
+  index: -1
+coin_0020_Layer-3
+  rotate: false
+  xy: 1929, 313
+  size: 64, 126
+  orig: 130, 129
+  offset: 33, 1
+  index: -1
+coin_0021_Layer-2
+  rotate: true
+  xy: 1128, 122
+  size: 40, 125
+  orig: 130, 129
+  offset: 45, 2
+  index: -1
+coin_0022_Layer-1
+  rotate: false
+  xy: 1800, 184
+  size: 126, 126
+  orig: 130, 129
+  offset: 1, 1
+  index: -1
+ef
+  rotate: false
+  xy: 2, 6
+  size: 154, 155
+  orig: 162, 163
+  offset: 5, 4
+  index: -1
+glow
+  rotate: false
+  xy: 1849, 63
+  size: 122, 119
+  orig: 150, 145
+  offset: 16, 14
+  index: -1
